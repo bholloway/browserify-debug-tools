@@ -1,0 +1,24 @@
+environment:
+  matrix:
+    - nodejs_version: "0.10"
+
+matrix:
+  fast_finish: true
+
+install:
+  - ps: Install-Product node $env:nodejs_version
+  - npm -g install npm@2.1.7
+  - set PATH=%APPDATA%\npm;%PATH%
+  - node -v
+  - npm -v          # expect npm 2.x
+  - npm install -g  # global install is neccessary to run the cli as intended
+  - npm link        # make the globally installed modules available locally
+  - echo %cd%
+  - dir /w
+
+test_script:
+  - node node_modules/jasmine-node/bin/jasmine-node --version # expect jasmine 2.x
+  - npm run lint
+  - npm test
+
+build: off

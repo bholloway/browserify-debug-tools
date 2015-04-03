@@ -1,0 +1,21 @@
+language: node_js
+
+node_js:
+  - "0.10"
+
+matrix:
+  fast_finish: true
+
+install:
+  - npm install -g npm@2.1.7
+  - node -v
+  - npm -v          # expect npm 2.x
+  - npm install -g  # global install is neccessary to run the cli as intended
+  - npm link        # make the globally installed modules available locally instead of installing from scratch
+  - pwd
+  - ls
+
+script:
+  - node node_modules/jasmine-node/bin/jasmine-node --version # expect jasmine 2.x
+  - npm run lint
+  - npm test
