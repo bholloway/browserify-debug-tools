@@ -120,12 +120,12 @@ function setUpTaskJavascript(context) {
           semiflat        = require('gulp-semiflat'),
           combined        = require('combined-stream'),
           to5ify          = require('6to5ify'),
-          stringify       = require('stringify');
+          stringify       = require('stringify'),
+          ngInject        = require('browserify-nginject'),
+          esmangleify     = require('esmangleify');
 
       var karma           = require('../lib/test/karma'),
           browserify      = require('../lib/build/browserify'),
-          ngInject        = require('../lib/build/browserify-nginject'),
-          esmangleify     = require('../lib/build/esmangleify'),
           hr              = require('../lib/util/hr'),
           streams         = require('../lib/config/streams'),
           jshintReporter  = require('../lib/util/jshint-reporter');
@@ -219,23 +219,11 @@ function setUpTaskJavascript(context) {
        * @param {boolean} isMinify Indicates whether minification will be used
        */
       function getTransforms(isMinify) {
-        /* jshint -W106 */
-        var MINIFY_OPTIONS = {
-          compress: { // anything that changes semicolons to commas will cause debugger problems
-            sequences: false,
-            join_vars: false
-          },
-          mangle  : {
-            toplevel: true
-          }
-        };
-        /* jshint +W106 */
         return [
           to5ify.configure({ ignoreRegex: /(?!)/ }),  // convert any es6 to es5 (degenerate regex)
           stringify({ minify: false }),               // allow import of html to a string
           ngInject(),                                 // annotate dependencies for angularjs
-          isMinify && esmangleify(),
-          require('../lib/build/browserify-debug')()
+          isMinify && esmangleify()
         ].filter(Boolean);
         // TODO @bholloway fix stringify({ minify: true }) throwing error on badly formed html so that we can minify
       }
