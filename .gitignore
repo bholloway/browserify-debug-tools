@@ -1,9 +1,3 @@
 /.idea
-/node_modules/*
-!/node_modules/browserify-debug-tools
-!/node_modules/browserify-nginject
-!/node_modules/esmangleify
-!/node_modules/browserify-esprima-tools
-/node_modules/**/node_modules
-/test/*temp
+/node_modules
 npm-debug.log

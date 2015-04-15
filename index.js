@@ -1,69 +1,41 @@
+/**
+ * Tools for debugging Browserify transforms.
+ * @see https://github.com/bholloway/browserify-debug-tools
+ * @author bholloway
+ */
 'use strict';
-var path            = require('path');
 
-var gulp            = require('gulp'),
-    runSequence     = require('run-sequence'),
-    pluginRegistry  = require('plugin-registry');
+var through = require('through2'),
+    fs      = require('fs');
 
-var taskYargsRun    = require('./lib/util/task-yargs-run');
+/**
+ * Transform that writes out the current state of the transformed file next to the original source file.
+ * Primarily for source map visualisation.
+ * @see http://sokra.github.io/source-map-visualization
+ * @param {string} [extension] An extention to append to the file
+ * @returns {Function} Browserify transform
+ */
+function dumpToFile(extension) {
+  return function(file) {
+    var chunks = [];
 
-var defaultTaskPlugins = [
-  'html',
-  'css',
-  'javascript',
-  'test',
-  'build',
-  'release',
-  'server',
-  'watch',
-  'init',
-  'webstorm'
-].map(function parseDefaultPluginDefinition(taskName) {
-  return {
-    name: taskName,
-    requirePath: path.resolve(__dirname, 'tasks', taskName),
-    category: 'task',
-    isDefault: true
-  };
-});
-
-var angularityJson;
-try {
-  angularityJson = require(path.resolve('angularity.json'));
-}
-catch (ex) {
-  // Do nothing
-}
-var configTaskPlugins = (angularityJson && angularityJson.plugins) || [];
-if (configTaskPlugins.constructor !== Array) {
-  throw new Error('Plugins defined in angularity.json should be an array');
-}
-
-var pluginContext = {
-  toolPath: __dirname
-};
-
-pluginRegistry
-  .get('angularity')
-  .context(pluginContext)
-  .add(defaultTaskPlugins)
-  .add(configTaskPlugins);
-
-pluginRegistry
-  .get('angularity')
-  .getAllOfCategory('task')
-  .forEach(function eachTaskPlugin(definition) {
-    var plugin = definition.plugin;
-
-    // Task plugins are expected to export a function which should be called with an instance of taskYargsRun
-    if (typeof plugin !== 'function') {
-      throw new Error('Plugin named ' + definition.name + ' does not export a function');
+    function transform(chunk, encoding, done) {
+      /* jshint validthis:true */
+      chunks.push(chunk);
+      this.push(chunk);
+      done();
     }
 
-    var taskDefinition = plugin({
-      taskYargsRun: taskYargsRun,
-      gulp: gulp,
-      runSequence: runSequence
-    });
-    taskYargsRun.taskYargs.register(taskDefinition);
-  });
+    function flush(done) {
+      var filename = [file, extension || 'gen'].join('.');
+      var data     = chunks.join('');
+      fs.writeFile(filename, data, done);
+    }
+
+    return through(transform, flush);
+  };
+}
+
+module.exports = {
+  dumpToFile: dumpToFile
+};

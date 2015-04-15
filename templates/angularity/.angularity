@@ -1,6 +1,0 @@
-{
-  "port": <%= port %>,
-  "ide": {
-    webstorm: "<%= webstorm-path %>"
-  }
-}
