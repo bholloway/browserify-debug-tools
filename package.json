@@ -1,6 +1,6 @@
 {
   "name": "browserify-debug-tools",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Tools for debugging Browserify transforms",
   "main": "index.js",
   "scripts": {},
@@ -12,6 +12,7 @@
     "debug",
     "browserify",
     "transform",
+    "browserify-transform",
     "tools",
     "utility"
   ],
