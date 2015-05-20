@@ -13,9 +13,10 @@ var through = require('through2'),
  * Primarily for source map visualisation.
  * @see http://sokra.github.io/source-map-visualization
  * @param {string} [extension] An extention to append to the file
- * @returns {Function} Browserify transform
+ * @param {RegExp} [regex] A filename filter
+ * @returns {function} Browserify transform
  */
-function dumpToFile(extension) {
+function dumpToFile(extension, regex) {
   return function(file) {
     var chunks = [];
 
@@ -27,9 +28,38 @@ function dumpToFile(extension) {
     }
 
     function flush(done) {
-      var filename = [file, extension || 'gen'].join('.');
-      var data     = chunks.join('');
-      fs.writeFile(filename, data, done);
+      if (!regex || regex.test(file)) {
+        var filename = [file, extension || 'gen'].join('.');
+        var data     = chunks.join('');
+        fs.writeFile(filename, data, done);
+      } else {
+        done();
+      }
+    }
+
+    return through(transform, flush);
+  };
+}
+
+/**
+ * Match a regular expression in the transformed file and call the given method for each file.
+ * @param {RegExp} regex A regular expression to test
+ * @param {function} callback A method to call with the matches for each file
+ */
+function match(regex, callback) {
+  return function(file) {
+    var chunks = [];
+
+    function transform(chunk, encoding, done) {
+      /* jshint validthis:true */
+      chunks.push(chunk);
+      this.push(chunk);
+      done();
+    }
+
+    function flush(done) {
+      callback(file, chunks.join('').match(regex));
+      done();
     }
 
     return through(transform, flush);
@@ -37,5 +67,6 @@ function dumpToFile(extension) {
 }
 
 module.exports = {
-  dumpToFile: dumpToFile
+  dumpToFile: dumpToFile,
+  match     : match
 };
