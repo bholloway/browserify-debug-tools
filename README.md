@@ -143,7 +143,7 @@ Each normal transform should be preceded by a **start()** and followed by a **st
 
 * **key** A key to delineate a segment
 
-Examples:
+Examples
 
 * Output a report on all categories whenever a bundle is completed
 
