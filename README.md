@@ -10,13 +10,11 @@ All of the debug tools are factories for a [browserify](http://browserify.org/) 
 
 They assume the programmatic API and, out of the box, will **not work with the command-line** browserify tool.
 
-However it may be possible to make a package that simply invokes the factory method and exports the resulting transform as something that the command line tool may use
-
-But in the case of the `profile` tool you will have no means to dump the resulting report. Normally this tool is used with a tool such as Gulp, where you invoke browserify and then print the report once the browserify is complete.
+However it may be possible to make a package that simply invokes the factory method and exports the resulting transform as something that the command line tool may use. But in the case of the `profile` tool you will have no means to dump the resulting report.
 
 ## Usage
 
-The utility methods should be invoked between your existing transforms in your transform list.
+In general, the debug tools should be invoked between your existing transforms in your transform list.
 
 In the examples below we will simplify the browserify invocation to just the transforms.
 
@@ -98,6 +96,8 @@ Parameters
 	```javascript
 	function(name, matches, [done]);
 	```
+
+Note that the callback is called for all files, regardless of whether the regex produced any matches.
 
 Examples
 
